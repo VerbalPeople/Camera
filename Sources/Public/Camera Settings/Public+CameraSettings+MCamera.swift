@@ -11,6 +11,7 @@
 
 import SwiftUI
 import AVKit
+import CoreImage
 
 // MARK: Initializer
 public extension MCamera {
@@ -345,6 +346,18 @@ public extension MCamera {
      ```
      */
     func onVideoCaptured(_ action: @escaping (URL, MCamera.Controller) -> ()) -> Self { config.videoCapturedAction = action; return self }
+    /**
+     Defines a custom processor for each CMSampleBuffer from the camera feed.
+
+     Return a CIImage to display instead of the default preview. Return nil to use the default rendering pipeline.
+     - parameter action: A closure receiving the CMSampleBuffer and a controller to control the camera.
+     */
+    func onVideoFrameProcessing(_ action: @escaping (CMSampleBuffer, MCamera.Controller) -> CIImage?) -> Self {
+        manager.sampleBufferProcessingAction = { sampleBuffer in
+            action(sampleBuffer, .init(mCamera: self))
+        }
+        return self
+    }
     /**
      Defines an action that is called for each CMSampleBuffer processed by the camera view.
 

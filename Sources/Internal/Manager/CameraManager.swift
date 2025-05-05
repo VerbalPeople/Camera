@@ -11,6 +11,7 @@
 
 import SwiftUI
 import AVKit
+import CoreVideo
 
 @MainActor public class CameraManager: NSObject, ObservableObject {
     @Published var attributes: CameraManagerAttributes = .init()
@@ -25,6 +26,8 @@ import AVKit
     private(set) var videoOutput: CameraManagerVideoOutput = .init()
     /// Callback invoked for each sample buffer processed by the camera preview.
     var sampleBufferCapturedAction: (CMSampleBuffer) -> Void = { _ in }
+    /// Allows custom processing of sample buffers. Return an optional CIImage to render; nil falls back to default pipeline.
+    var sampleBufferProcessingAction: (CMSampleBuffer) -> CIImage? = { _ in nil }
 
     // MARK: UI Elements
     private(set) var cameraView: UIView!
@@ -88,6 +91,10 @@ private extension CameraManager {
     }
     func setupFrameRecorder() throws(MCameraError) {
         let captureVideoOutput = AVCaptureVideoDataOutput()
+        // Receive BGRA pixel buffers for processing and display
+        captureVideoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
         captureVideoOutput.setSampleBufferDelegate(cameraMetalView, queue: .main)
 
         try captureSession.add(output: captureVideoOutput)
