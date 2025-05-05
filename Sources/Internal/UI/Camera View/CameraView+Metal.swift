@@ -178,6 +178,7 @@ extension CameraMetalView {
 extension CameraMetalView: @preconcurrency AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let cvImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        parent.sampleBufferCapturedAction(sampleBuffer)
 
         let currentFrame = captureCurrentFrame(cvImageBuffer)
         let currentFrameWithFiltersApplied = applyingFiltersToCurrentFrame(currentFrame)

@@ -23,6 +23,8 @@ import AVKit
     // MARK: Output
     private(set) var photoOutput: CameraManagerPhotoOutput = .init()
     private(set) var videoOutput: CameraManagerVideoOutput = .init()
+    /// Callback invoked for each sample buffer processed by the camera preview.
+    var sampleBufferCapturedAction: (CMSampleBuffer) -> Void = { _ in }
 
     // MARK: UI Elements
     private(set) var cameraView: UIView!

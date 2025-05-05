@@ -345,6 +345,18 @@ public extension MCamera {
      ```
      */
     func onVideoCaptured(_ action: @escaping (URL, MCamera.Controller) -> ()) -> Self { config.videoCapturedAction = action; return self }
+    /**
+     Defines an action that is called for each CMSampleBuffer processed by the camera view.
+
+     Use this to gain access to raw video frames as CMSampleBuffer objects.
+     */
+    func onSampleBufferCaptured(_ action: @escaping (CMSampleBuffer, MCamera.Controller) -> ()) -> Self {
+        let mCamera = self
+        manager.sampleBufferCapturedAction = { sampleBuffer in
+            action(sampleBuffer, .init(mCamera: mCamera))
+        }
+        return self
+    }
 }
 
 // MARK: Others
