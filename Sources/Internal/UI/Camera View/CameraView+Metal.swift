@@ -177,11 +177,21 @@ extension CameraMetalView {
 // MARK: Capture
 extension CameraMetalView: @preconcurrency AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        // Extract pixel buffer, notify listeners
         guard let cvImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        parent.sampleBufferCapturedAction(sampleBuffer)
 
-        let currentFrame = captureCurrentFrame(cvImageBuffer)
-        let currentFrameWithFiltersApplied = applyingFiltersToCurrentFrame(currentFrame)
-        redrawCameraView(currentFrameWithFiltersApplied)
+        // Unified pipeline: use processed image or raw buffer
+        let baseImage: CIImage
+        if let processed = parent.sampleBufferProcessingAction(sampleBuffer) {
+            baseImage = processed
+        } else {
+            baseImage = CIImage(cvImageBuffer: cvImageBuffer)
+        }
+        // Apply orientation and filters
+        let oriented = baseImage.oriented(parent.attributes.frameOrientation)
+        let finalImage = applyingFiltersToCurrentFrame(oriented)
+        redrawCameraView(finalImage)
     }
 }
 private extension CameraMetalView {
